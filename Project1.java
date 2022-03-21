@@ -1,5 +1,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -9,9 +12,10 @@ public class Project1 {
 	public static void main(String[] args) throws FileNotFoundException {
 		File testFile = new File("Example.txt");
 		Scanner scr = new Scanner(testFile);
-		String emptySubSet = "";
 		HashMap<String, String> stateTransitionMap = new HashMap<>();
+		ArrayList<ArrayList<Character>> powerSet = new ArrayList<>();
 		int startingIndex = -1;
+		String emptySubSet = "";
 		
 		while(scr.hasNext()) {
 			String line = scr.nextLine();
@@ -34,19 +38,15 @@ public class Project1 {
 		}
 		scr.close();
 		
-		//print out all the states(keys) and transitions(values)
-		for(Entry<String, String> e : stateTransitionMap.entrySet()) {
-			System.out.println("State:" + e.getKey() + " Transitions: " + e.getValue());
-		}
-		
 		//create an array of all the states and pass to findPowerSet()
 		Object[] states = stateTransitionMap.keySet().toArray();
-		System.out.print("\nPower Set: { ");
-		findPowerSet(states, emptySubSet, startingIndex);
-		System.out.print("}\n");
+		System.out.print("Power Set: ");
+		findPowerSet(states, emptySubSet, startingIndex, powerSet);
+		System.out.println(powerSet.toString());
 		
+		//for each state in our map find E(state)
 		for(Entry<String, String> e : stateTransitionMap.entrySet()) {
-			System.out.print("E(" + e.getKey() + ") = " + e.getKey());
+			System.out.print("E(" + e.getKey() + ") = " + e.getKey() + " ");
 			E(stateTransitionMap, e.getKey());
 		}
 
@@ -59,25 +59,37 @@ public class Project1 {
 			return;
 		}
 		
-		System.out.print(currTransition);
+		CharacterIterator iterator = new StringCharacterIterator(currTransition);
+		while(iterator.current() != CharacterIterator.DONE) {
+			System.out.print(iterator.current() + " ");
+			iterator.next();
+		}
+		
 		key = Character.toString(currTransition.charAt(currTransition.length()-1));
 		E(stateTransitionMap, key);
 		
 	}
 
-	static void findPowerSet(Object[] states, String currSubSet, int start) {
+	static void findPowerSet(Object[] states, String currSubSet, int start, ArrayList<ArrayList<Character>> powerSet) {
 		int length = states.length;
 		
 		if (start == length) {
 			return;
 		}
 		
-		System.out.print("{" + currSubSet + "} ");
+		ArrayList<Character> temp = new ArrayList<>();
+		CharacterIterator iterator = new StringCharacterIterator(currSubSet);
+		while(iterator.current() != CharacterIterator.DONE) {
+			temp.add(iterator.current());
+			iterator.next();
+		}
+		powerSet.add(temp);
 		
 		for(int i = start + 1; i < length; i++) {
 			currSubSet += states[i];
-			findPowerSet(states, currSubSet, i);
+			findPowerSet(states, currSubSet, i, powerSet);
 			currSubSet = currSubSet.substring(0, currSubSet.length()- 1);
 		}
 	}
+	
 }
